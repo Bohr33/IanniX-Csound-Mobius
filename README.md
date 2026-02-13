@@ -47,4 +47,4 @@ This project bridges IanniX's visual graphing capabilities with Csound's synthes
 
 ## More Information
 
-For an in-depth exploration of the parametric equations, OSC implementation, and Csound instrument design, see the [complete project write-up](FUTURE WEBSITE LINK).
+For an in-depth exploration of the parametric equations, OSC implementation, and Csound instrument design, see the [complete project write-up](https://bohr33.github.io/projects/iannix-mobius/).

@@ -1,0 +1,1436 @@
+/*
+ *	IanniX Score File
+ */
+
+
+/*
+ *	This method is called first.
+ *	It is the good section for asking user for script global variables (parameters).
+ *	
+ * 	This section is never overwritten by IanniX when saving.
+ */
+function askUserForParameters() {
+	//title("The title of the parameter box");
+	//ask("Group name of the parameter (only for display purposes)", "Parameter label", "myGlobalVar", "theDefaultValue");
+	title("Mobius Strip");
+	//Global variables
+	ask("Mobius", "Resolution", "Num_Curves", 50)
+	ask("Mobius", "CursorOffset", "Offset", 0)
+	ask("Mobius", "Cartesian/Polar", "car_pol", 0)
+}
+
+function makeWithScript() {
+	//Clears the score
+	run("clear");
+	//Resets rotation
+	run("rotate 0 0 0");
+	//Resets score viewport center
+	run("center 0 0");
+	//Resets score zoom
+	run("zoom 100");
+	
+
+	//run("add curve 1");
+	//run("setgroup current test");
+	//run("setEquation current cartesian sin(t), cos(t), 0")
+	//test2();
+	mobius2();
+	run("add trigger 2001")
+	run("setpos current 1.02 -0.005 0");
+	
+
+}
+
+function mobius2()
+{
+	//User Variables
+	var N = Num_Curves;
+	var cursor_offset = Offset;
+	
+	var coord_type = "cartesian";
+	if(car_pol != 0){
+	 coord_type = "polar";
+	}
+	//width can also be controlled by parameter 5.
+	var width = 1;
+	var id = 1;
+	//width is multiplied by two to make the loop completely continous
+	//It looks ok with regular width, however the end points don't align completely
+	//Multiplication by 2 makes each curve go around twice and looks more complete.
+	var incr = width/N;
+	var v = -width;
+	var thickness = 1;
+
+	var blue = 0;
+	var red = 0;
+	var c_incr = 255/N;
+	var offset_incr = 0
+	if(cursor_offset != 0){
+		offset_incr = 25.547 * cursor_offset/N
+	}
+	var offset = 0;
+
+	for(var i = 0 ; i <= N ; i++){
+
+		run("add curve " + (id + i));
+		run("setgroup current mobius");
+		run("setPos 	current 0 0 0");
+		//run("setColor current " + red + " 50 100 255");
+		run("setSize current " + thickness);
+		//run("setEquation current carestian (1 +" + v + "*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +" + v + "*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4)," + v +"*param5*10* 0.5 * sin(4*PI*t/2)");
+		run("setEquation current " + coord_type + " (1 +" + v + "*param5*10*.5*cos(4*PI*t*2 * param1))*cos(t*4*PI*param2),(1 +" + v + "*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4)," + v +"*param5*10* 0.5 * sin(4*PI*t/2)");
+		run("setEquationParam current param1 1");
+		run("setEquationParam current param2 1");
+		run("setEquationParam current param3 1");
+		run("setEquationParam current param4 1");
+		run("setEquationParam current param5 0.1");
+		
+
+		run("add cursor  " + (1001 + i));
+		run("setCurve current lastCurve");
+		run("setSpeed current .1");
+		run("setPattern current 0 0 1");
+		run("setGroup current cursors");
+		run("setColor current 100 20 " + blue + " 255");
+		run("setWidth current .05");
+		run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z");
+		run("setoffset current " + offset + " 0 0");
+		//run("setoffset current 2 0 0")
+	
+		
+		red += c_incr;
+		blue += c_incr;
+		v += incr;
+		offset += offset_incr;
+	}
+}
+
+
+/*
+ *	When an incoming message is received, this method is called.
+ *		- <protocol> tells information about the nature of message ("osc", "midi", "direct…)
+ *		- <host> and <port> gives the origin of message, specially for IP protocols (for OpenSoundControl, UDP or TCP, it is the IP and port of the application that sends the message)
+ *		- <destination> is the supposed destination of message (for OpenSoundControl it is the path, for MIDI it is Control Change or Note on/off…)
+ *		- <values> are an array of arguments contained in the message
+ *	
+ * 	This section is never overwritten by IanniX when saving.
+ */
+function onIncomingMessage(protocol, host, port, destination, values) {
+	//Logs a message in the console (open "Config" tab from Inspector panel and see "Message log")
+	console("Received on '" + protocol + "' (" + host + ":" + port + ") to '" + destination + "', " + values.length + " values : ");
+	
+	//Browses all the arguments and displays them in log window
+	for(var valueIndex = 0 ; valueIndex < values.length ; valueIndex++)
+		console("- arg " + valueIndex + " = " + values[valueIndex]);
+}
+
+
+/*
+ *	This method stores all the operations made through the graphical user interface.
+ *	You are not supposed to modify this section, but it can be useful to remove some stuff that you added accidentaly.
+ *	
+ * 	Be very careful! This section is automaticaly overwritten when saving a score.
+ */
+function madeThroughGUI() {
+//GUI: NEVER EVER REMOVE THIS LINE
+	run("center 0.438545 -0.0937027");
+	run("rotate 0 -54.7274 79.0391");
+	run("zoom 86.5096");
+	run("speed 0.67");
+
+
+	run("add trigger 2001");
+	run("setpos current 1.02 -0.005 0");
+	run("setmessage current 1, osc://ip_out:port_out/trigger trigger_id trigger_value , midi://midi_out/notef 1 trigger_value_y trigger_value_x trigger_duration , tcp:// trigger trigger_id trigger_group_id trigger_value_x trigger_value_y trigger_value_z trigger_xPos trigger_yPos trigger_zPos cursor_id ,");
+	run("setequationparam current param5 0.15");
+	run("settriggeroff current 0.1");
+
+
+	run("add curve 33");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.35999999999999943*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.35999999999999943*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.35999999999999943*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1033");
+	run("setcurve current lastCurve");
+	run("setpos current 0.497692 0.771511 -0.131396");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 163 255");
+	run("setcolorinactive current 100 20 163 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 16.3501 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 34");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.3399999999999994*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.3399999999999994*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.3399999999999994*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1034");
+	run("setcurve current lastCurve");
+	run("setpos current 0.258421 0.927401 -0.142443");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 168 255");
+	run("setcolorinactive current 100 20 168 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 16.861 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 35");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.3199999999999994*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.3199999999999994*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.3199999999999994*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1035");
+	run("setcurve current lastCurve");
+	run("setpos current -0.027649 1.00302 -0.139147");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 173 255");
+	run("setcolorinactive current 100 20 173 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 17.372 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 48");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.05999999999999939*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.05999999999999939*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.05999999999999939*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1048");
+	run("setcurve current lastCurve");
+	run("setpos current 0.478208 -0.843117 0.0228345");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 239 255");
+	run("setcolorinactive current 100 20 239 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 24.0142 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 49");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.03999999999999938*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.03999999999999938*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.03999999999999938*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1049");
+	run("setcurve current lastCurve");
+	run("setpos current 0.680881 -0.685448 0.0126084");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 244 255");
+	run("setcolorinactive current 100 20 244 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 24.5251 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 50");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.019999999999999383*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.019999999999999383*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.019999999999999383*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1050");
+	run("setcurve current lastCurve");
+	run("setpos current 0.84132 -0.487708 0.00461695");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 249 255");
+	run("setcolorinactive current 100 20 249 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 25.0361 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 51");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +6.175615574477433e-16*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +6.175615574477433e-16*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),6.175615574477433e-16*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1051");
+	run("setcurve current lastCurve");
+	run("setpos current 0.95169 -0.261266 -8.24885e-17");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 254 255");
+	run("setcolorinactive current 100 20 254 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 25.547 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 12");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.7799999999999998*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.7799999999999998*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.7799999999999998*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1012");
+	run("setcurve current lastCurve");
+	run("setpos current 0.6322 0.274484 -0.134275");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 56 255");
+	run("setcolorinactive current 100 20 56 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 5.62034 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 13");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.7599999999999998*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.7599999999999998*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.7599999999999998*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1013");
+	run("setcurve current lastCurve");
+	run("setpos current 0.554305 0.520861 -0.225618");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 61 255");
+	run("setcolorinactive current 100 20 61 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 6.13128 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 14");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.7399999999999998*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.7399999999999998*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.7399999999999998*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1014");
+	run("setcurve current lastCurve");
+	run("setpos current 0.391048 0.7607 -0.286019");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 66 255");
+	run("setcolorinactive current 100 20 66 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 6.64222 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 15");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.7199999999999998*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.7199999999999998*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.7199999999999998*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1015");
+	run("setcurve current lastCurve");
+	run("setpos current 0.128834 0.950588 -0.310354");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 71 255");
+	run("setcolorinactive current 100 20 71 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 7.15316 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 8");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.8599999999999999*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.8599999999999999*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.8599999999999999*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1008");
+	run("setcurve current lastCurve");
+	run("setpos current 0.44074 -0.638455 0.310779");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 35 255");
+	run("setcolorinactive current 100 20 35 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 3.57658 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 9");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.8399999999999999*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.8399999999999999*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.8399999999999999*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1009");
+	run("setcurve current lastCurve");
+	run("setpos current 0.568918 -0.390607 0.215928");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 40 255");
+	run("setcolorinactive current 100 20 40 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 4.08752 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 10");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.8199999999999998*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.8199999999999998*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.8199999999999998*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1010");
+	run("setcurve current lastCurve");
+	run("setpos current 0.63117 -0.154341 0.100245");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 45 255");
+	run("setcolorinactive current 100 20 45 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 4.59846 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 11");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.7999999999999998*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.7999999999999998*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.7999999999999998*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1011");
+	run("setcurve current lastCurve");
+	run("setpos current 0.651424 0.0404461 -0.0213951");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 51 255");
+	run("setcolorinactive current 100 20 51 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 5.1094 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 4");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.94*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.94*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.94*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1004");
+	run("setcurve current lastCurve");
+	run("setpos current -0.93824 -0.92293 0.282085");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 15 255");
+	run("setcolorinactive current 100 20 15 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 1.53282 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 5");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.9199999999999999*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.9199999999999999*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.9199999999999999*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1005");
+	run("setcurve current lastCurve");
+	run("setpos current -0.521185 -1.07264 0.35884");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 20 255");
+	run("setcolorinactive current 100 20 20 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 2.04376 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 6");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.8999999999999999*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.8999999999999999*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.8999999999999999*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1006");
+	run("setcurve current lastCurve");
+	run("setpos current -0.112703 -1.03967 0.389205");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 25 255");
+	run("setcolorinactive current 100 20 25 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 2.5547 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 7");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.8799999999999999*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.8799999999999999*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.8799999999999999*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1007");
+	run("setcurve current lastCurve");
+	run("setpos current 0.217156 -0.872869 0.371704");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 30 255");
+	run("setcolorinactive current 100 20 30 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 3.06564 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 1");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-1*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-1*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-1*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1001");
+	run("setcurve current lastCurve");
+	run("setpos current -1.3558 0.378837 -0.125867");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 0 255");
+	run("setcolorinactive current 100 20 0 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 0 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 2");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.98*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.98*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.98*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1002");
+	run("setcurve current lastCurve");
+	run("setpos current -1.42315 -0.119569 0.0248704");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 5 255");
+	run("setcolorinactive current 100 20 5 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 0.51094 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 3");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.96*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.96*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.96*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1003");
+	run("setcurve current lastCurve");
+	run("setpos current -1.26836 -0.587092 0.166462");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 10 255");
+	run("setcolorinactive current 100 20 10 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 1.02188 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 28");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.4599999999999995*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.4599999999999995*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.4599999999999995*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1028");
+	run("setcurve current lastCurve");
+	run("setpos current 0.70452 -0.406445 0.105852");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 137 255");
+	run("setcolorinactive current 100 20 137 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 13.7954 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 29");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.4399999999999995*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.4399999999999995*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.4399999999999995*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1029");
+	run("setcurve current lastCurve");
+	run("setpos current 0.790472 -0.156593 0.045844");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 142 255");
+	run("setcolorinactive current 100 20 142 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 14.3063 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 30");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.4199999999999995*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.4199999999999995*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.4199999999999995*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1030");
+	run("setcurve current lastCurve");
+	run("setpos current 0.815686 0.0587376 -0.0130188");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 147 255");
+	run("setcolorinactive current 100 20 147 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 14.8173 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 31");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.39999999999999947*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.39999999999999947*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.39999999999999947*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1031");
+	run("setcurve current lastCurve");
+	run("setpos current 0.77811 0.314934 -0.0648569");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 152 255");
+	run("setcolorinactive current 100 20 152 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 15.3282 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 24");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.5399999999999996*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.5399999999999996*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.5399999999999996*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1024");
+	run("setcurve current lastCurve");
+	run("setpos current -0.285348 -1.03353 0.226279");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 117 255");
+	run("setcolorinactive current 100 20 117 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 11.7516 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 25");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.5199999999999996*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.5199999999999996*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.5199999999999996*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1025");
+	run("setcurve current lastCurve");
+	run("setpos current 0.0521625 -0.983975 0.225885");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 122 255");
+	run("setcolorinactive current 100 20 122 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 12.2626 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 26");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.49999999999999956*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.49999999999999956*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.49999999999999956*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1026");
+	run("setcurve current lastCurve");
+	run("setpos current 0.33727 -0.841828 0.202367");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 127 255");
+	run("setcolorinactive current 100 20 127 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 12.7735 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 27");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.47999999999999954*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.47999999999999954*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.47999999999999954*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1027");
+	run("setcurve current lastCurve");
+	run("setpos current 0.554985 -0.640457 0.160316");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 132 255");
+	run("setcolorinactive current 100 20 132 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 13.2844 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 20");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.6199999999999997*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.6199999999999997*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.6199999999999997*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1020");
+	run("setcurve current lastCurve");
+	run("setpos current -1.26942 -0.00750228 -0.00514319");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 96 255");
+	run("setcolorinactive current 100 20 96 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 9.70786 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 21");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.5999999999999996*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.5999999999999996*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.5999999999999996*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1021");
+	run("setcurve current lastCurve");
+	run("setpos current -1.18753 -0.417386 0.0804381");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 101 255");
+	run("setcolorinactive current 100 20 101 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 10.2188 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 22");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.5799999999999996*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.5799999999999996*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.5799999999999996*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1022");
+	run("setcurve current lastCurve");
+	run("setpos current -0.961231 -0.750127 0.151438");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 107 255");
+	run("setcolorinactive current 100 20 107 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 10.7297 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 23");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.5599999999999996*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.5599999999999996*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.5599999999999996*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1023");
+	run("setcurve current lastCurve");
+	run("setpos current -0.640592 -0.960203 0.201276");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 112 255");
+	run("setcolorinactive current 100 20 112 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 11.2407 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 16");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.6999999999999997*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.6999999999999997*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.6999999999999997*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1016");
+	run("setcurve current lastCurve");
+	run("setpos current -0.216697 1.0366 -0.298095");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 76 255");
+	run("setcolorinactive current 100 20 76 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 7.6641 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 17");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.6799999999999997*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.6799999999999997*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.6799999999999997*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1017");
+	run("setcurve current lastCurve");
+	run("setpos current -0.597239 0.976243 -0.25304");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 81 255");
+	run("setcolorinactive current 100 20 81 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 8.17504 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 18");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.6599999999999997*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.6599999999999997*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.6599999999999997*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1018");
+	run("setcurve current lastCurve");
+	run("setpos current -0.942943 0.758001 -0.182527");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 86 255");
+	run("setcolorinactive current 100 20 86 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 8.68598 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 19");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.6399999999999997*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.6399999999999997*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.6399999999999997*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1019");
+	run("setcurve current lastCurve");
+	run("setpos current -1.18336 0.409744 -0.0962972");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 91 255");
+	run("setcolorinactive current 100 20 91 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 9.19692 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 44");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.1399999999999994*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.1399999999999994*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.1399999999999994*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1044");
+	run("setcurve current lastCurve");
+	run("setpos current -0.538406 -0.897604 0.051951");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 219 255");
+	run("setcolorinactive current 100 20 219 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 21.9704 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 45");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.1199999999999994*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.1199999999999994*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.1199999999999994*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1045");
+	run("setcurve current lastCurve");
+	run("setpos current -0.280429 -0.984228 0.0501658");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 224 255");
+	run("setcolorinactive current 100 20 224 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 22.4814 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 46");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.0999999999999994*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.0999999999999994*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.0999999999999994*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1046");
+	run("setcurve current lastCurve");
+	run("setpos current -0.014688 -1.00038 0.0434953");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 229 255");
+	run("setcolorinactive current 100 20 229 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 22.9923 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 47");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.07999999999999939*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.07999999999999939*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.07999999999999939*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1047");
+	run("setcurve current lastCurve");
+	run("setpos current 0.24262 -0.95096 0.033742");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 234 255");
+	run("setcolorinactive current 100 20 234 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 23.5032 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 40");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.21999999999999936*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.21999999999999936*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.21999999999999936*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1040");
+	run("setcurve current lastCurve");
+	run("setpos current -1.0912 0.0684098 -0.00830905");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 198 255");
+	run("setcolorinactive current 100 20 198 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 19.9267 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 41");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.19999999999999937*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.19999999999999937*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.19999999999999937*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1041");
+	run("setcurve current lastCurve");
+	run("setpos current -1.06476 -0.238769 0.0168673");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 203 255");
+	run("setcolorinactive current 100 20 203 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 20.4376 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 42");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.17999999999999938*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.17999999999999938*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.17999999999999938*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1042");
+	run("setcurve current lastCurve");
+	run("setpos current -0.951757 -0.515532 0.0357371");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 209 255");
+	run("setcolorinactive current 100 20 209 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 20.9485 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 43");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.1599999999999994*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.1599999999999994*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.1599999999999994*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1043");
+	run("setcurve current lastCurve");
+	run("setpos current -0.769269 -0.739636 0.0474205");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 214 255");
+	run("setcolorinactive current 100 20 214 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 21.4595 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 36");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.2999999999999994*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.2999999999999994*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.2999999999999994*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1036");
+	run("setcurve current lastCurve");
+	run("setpos current -0.332313 0.98205 -0.123681");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 178 255");
+	run("setcolorinactive current 100 20 178 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 17.8829 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 37");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.27999999999999936*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.27999999999999936*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.27999999999999936*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1037");
+	run("setcurve current lastCurve");
+	run("setpos current -0.621198 0.861018 -0.0992032");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 183 255");
+	run("setcolorinactive current 100 20 183 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 18.3938 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 38");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.25999999999999934*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.25999999999999934*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.25999999999999934*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1038");
+	run("setcurve current lastCurve");
+	run("setpos current -0.860244 0.651069 -0.0693846");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 188 255");
+	run("setcolorinactive current 100 20 188 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 18.9048 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 39");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.23999999999999935*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.23999999999999935*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.23999999999999935*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1039");
+	run("setcurve current lastCurve");
+	run("setpos current -1.02213 0.376263 -0.037964");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 193 255");
+	run("setcolorinactive current 100 20 193 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 19.4157 0 end");
+	run("settime current 7.62108681618924");
+
+
+	run("add curve 32");
+	run("setpos current 0 0 0");
+	run("setgroup current mobius");
+	run("setsize current 1");
+	run("setequation current cartesian (1 +-0.37999999999999945*param5*10*.5*cos(4*PI*t*.5*param1))*cos(t*4*PI*param2),(1 +-0.37999999999999945*param5*10*.5*cos(4*PI*t/2*param3))*sin(4*PI*t*param4),-0.37999999999999945*param5*10* 0.5 * sin(4*PI*t/2)");
+	run("setequationparam current param2 0.5");
+	run("setequationparam current param3 1");
+	run("setequationparam current param4 0.504");
+	run("setequationparam current param5 0.087");
+	run("setequationparam current param1 1");
+	run("add cursor 1032");
+	run("setcurve current lastCurve");
+	run("setpos current 0.6729 0.559128 -0.105226");
+	run("setspeed current 0.1");
+	run("setpattern current 0 0 1");
+	run("setgroup current cursors");
+	run("setcoloractive current 100 20 158 255");
+	run("setcolorinactive current 100 20 158 255");
+	run("setwidth current 0.65");
+	run("setmessage current 20, osc://ip_out:port_out/cursor cursor_id cursor_value_x cursor_value_y cursor_value_z cursor_time_percent ,");
+	run("setoffset current 15.8391 0 end");
+	run("settime current 7.62108681618924");
+
+
+
+
+//GUI: NEVER EVER REMOVE THIS LINE
+}
+
+
+/*
+ *	This method stores all the operations made by other softwares through one of the IanniX interfaces.
+ *	You are not supposed to modify this section, but it can be useful to remove some stuff that you or a third party software added accidentaly.
+ *	
+ * 	Be very careful! This section is automaticaly overwritten when saving a score.
+ */
+function madeThroughInterfaces() {
+//INTERFACES: NEVER EVER REMOVE THIS LINE
+	run("rotate 0 -54.7274 79.0391");
+	run("speed 0.67");
+
+
+//INTERFACES: NEVER EVER REMOVE THIS LINE
+}
+
+
+/*
+ *	This method is called last.
+ *	It allows you to modify your hand-drawn score (made through graphical user interface).
+ *	
+ * 	This section is never overwritten by IanniX when saving.
+ */
+function alterateWithScript() {
+	
+}
+
+
+/*
+ *	//APP VERSION: NEVER EVER REMOVE THIS LINE
+ *	Made with IanniX 0.9.20
+ *	//APP VERSION: NEVER EVER REMOVE THIS LINE
+ */
+
+
+
+/*
+    This file is part of IanniX, a graphical real-time open-source sequencer for digital art
+    Copyright (C) 2010-2015 — IanniX Association
+
+    Project Manager: Thierry Coduys (http://www.le-hub.org)
+    Development:     Guillaume Jacquemin (https://www.buzzinglight.com)
+
+    This file was written by Guillaume Jacquemin.
+
+    IanniX is a free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+

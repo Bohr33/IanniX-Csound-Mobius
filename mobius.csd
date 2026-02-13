@@ -9,7 +9,7 @@ ksmps = 64
 nchnls = 2
 0dbfs = 1
 
-giPortHandle OSCinit 57121
+giPortHandle OSCinit 57120
 giNumBands init 51
 
 //Cursor Values
@@ -135,6 +135,8 @@ i3 0 1000 0
 
 </CsScore>
 </CsoundSynthesizer>
+
+
 
 
 
